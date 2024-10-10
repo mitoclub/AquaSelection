@@ -1,26 +1,7 @@
 # AquaSelection
-Aqua selection
-Our research work
-  Worldwide and Russian fish farming supplies about half of all fish intended for food, and yet this percentage increases every year. However, maintaining populations in artificial conditions weakens the effect of natural selection, leading to the loss of favourable genes, increases susceptibility of fish to diseases and brings about large economic losses due to reduced product output.
-  The main genetic problem is that the artificial populations are influenced by a strong genetic drift, which results in many mildly harmful mutations accumulating throughout the genome, reducing the adaptability of the entire population. In the current research, we plan to develop a methodology based on induced stress and subsequent strict cut-off selection, reducing the effects of mildly harmful mutations in the genomes of domesticated species. In other words, the goal of this investigation is to study and implement genetic selection methods into cultivating fish populations, which, in turn will lead to “purification” of mentioned populations from individuals with poor genetics. This approach will help us restore and maintain the high quality of the gene pool of domesticated animals, which will contribute to increasing the economic value of fish farms.
-  _Firstly_, we need to study the handicap effect using computer simulation of natural populations and report the first results which demonstrate that the handicap concept is efficient. _Secondly_, we plan to introduce a new experiment with Daphnia magna, which is an ideal model organism for fast screening of various stress factors (handicaps). _Thirdly_, similar but less in-depth experiments will be carried out on Danio rerio. And finally, essential short-term experiments will be carried out on carp, that will make it possible to identify stress factors, which interact with the effect of harmful mutations.
+
+Our research work in Aqua selection project. <br>
+&emsp; Worldwide and Russian fish farming supplies about half of all fish intended for food, and yet this percentage increases every year. However, maintaining populations in artificial conditions weakens the effect of natural selection, leading to the loss of favourable genes, increases susceptibility of fish to diseases and brings about large economic losses due to reduced product output.<br>
+&emsp; The main genetic problem is that the artificial populations are influenced by a strong genetic drift, which results in many mildly harmful mutations accumulating throughout the genome, reducing the adaptability of the entire population. In the current research, we plan to develop a methodology based on induced stress and subsequent strict cut-off selection, reducing the effects of mildly harmful mutations in the genomes of domesticated species. In other words, the goal of this investigation is to study and implement genetic selection methods into cultivating fish populations, which, in turn will lead to “purification” of mentioned populations from individuals with poor genetics. This approach will help us restore and maintain the high quality of the gene pool of domesticated animals, which will contribute to increasing the economic value of fish farms.<br>
+&emsp; _Firstly_, we need to study the handicap effect using computer simulation of natural populations and report the first results which demonstrate that the handicap concept is efficient. _Secondly_, we plan to introduce a new experiment with Daphnia magna, which is an ideal model organism for fast screening of various stress factors (handicaps). _Thirdly_, similar but less in-depth experiments will be carried out on Danio rerio. And finally, essential short-term experiments will be carried out on carp, that will make it possible to identify stress factors, which interact with the effect of harmful mutations.
 After successful approbation of the methodology, we plan to extend this approach to investigating other animals.
-
-
-CODE - код, включающий в себя: номер самки, номер самца, мутаген (C-контроль, М - 2мМ), стадия, температура, время экспозиции
-CUP_NUMBER  - номер чашки
-STAGE - стадия, на которой грели
-TEMP - температура, на которой грели
-TIME - время экспозиции
-FERT - оплодотворены
-HATCHED - выклевались
-SWIM - вставшие на плав
-
-in 2023_1_exp
-KIND: MALES == R(МЧ - чешуйчатый) and S(МР - разбросаный), FEMALE: ЗУ-НК
-STAGE: V - optical vesicle(22-somites), P - pharingula
-D/U == уроды(dead/ugly)
-
-in 2023_2_exp
-STAGE: V - optical vesicle(22-somites), G - gastrulation
-NAME+... - кто считал
