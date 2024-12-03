@@ -38,4 +38,10 @@ bcftools index --threads 4 CARP_KANT.vcf.gz
 
 # intersect samples
 bcftools isec -p isec_out --threads 4 CARP_KANT.vcf.gz
+
+
+
+# filter the variants
+# bcftools view -e 'TYPE="indel"' -i 'QUAL>30 && DP>5^C& GQ>20'
+vcftools --vcf CARP_KANT.vcf --out SNPs_only --recode --recode-INFO-all --minQ 30 --minDP 5 --minGQ 20 --remove-indels
 ```
