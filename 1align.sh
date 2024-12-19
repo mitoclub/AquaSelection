@@ -27,6 +27,12 @@ do
 
     echo "samtools stats process..." 
     samtools idxstats --threads $THREADS $BAM > $idxstats
-    bamtools coverage -in $BAM > $coverage
+    # The output is TAB-delimited with each line consisting of 
+    # reference sequence name, sequence length, # mapped read-segments and # unmapped read-segments. 
+    # Note this may count reads multiple times if they are mapped more than once or in multiple fragments. 
+    
+    # samtools coverage -in $BAM > $coverage
 
 done
+
+тут надо добавить софт клиппинг и явный перевод в бам

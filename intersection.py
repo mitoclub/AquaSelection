@@ -15,14 +15,6 @@ for c in tqdm.tqdm(car_cols[:2]):
     df[c] = df[c].replace('./.', '').str.split('/')\
         .apply(lambda x: set() if x[0] == '' else set(x))
 
-# d['mother'] = d['mother'].str.split('/').apply(set)
-# d['father'] = d['father'].str.split('/').apply(set)
-# d['child']  = d['child'].str.split('/').apply(set)
-# d
-# d.apply(lambda x: [len(x.child.intersection(x.mother)), 
-#                    len(x.child.intersection(x.father)),
-#                    len(x.child.difference(x.father.union(x.mother)))], axis=1)
-
 handle = open('./data/interim/ident.txt', 'w')
 handle.write('sample\tmother\tfather\tdiff\n')
 for i, row in tqdm.tqdm(df.iterrows(), 'vatiants', 28822046):
