@@ -24,34 +24,27 @@ FORMAT GT:PL:DP
 ```bash
 cd data/interim/redo
 
-# #v1
-# cat ../CARP_chr.txt | parallel --dry-run -j 26 --ungroup  "bcftools mpileup --redo-BAQ --min-BQ 30 -m 3 --per-sample-mF -a DP --threads 4 -f ../../ref/GCF_018340385.1_ASM1834038v1_genomic.fna ../bams/CAR*.marked_duplicates.bam -r {} | bcftools call --threads 4 -mv -Ov -o ./vcf/carps_{}.vcf"
-#v2
+# OC of bams
+ls CAR*.marked_duplicates.bam | parallel --dry-run qualimap --java-mem-size=16G bamqc -bam {} -nt 4 -c -outdir results_bamqc_{\.}
+
+
+# call and filter variants in bcftools
 cat ../CARP_chr.txt | parallel --dry-run -j 51 --ungroup  "bcftools mpileup --redo-BAQ --min-BQ 30 -m 3 --per-sample-mF -a DP,AD,QS --threads 4 -f ../../ref/GCF_018340385.1_ASM1834038v1_genomic.fna ../bams/CAR*.marked_duplicates.bam -r {} | bcftools call --threads 4 -mv -Ov -o ./vcf2/carps_{}.vcf"
 
-bcftools concat -Ou -o carps32.vcf ./vcf2/*.vcf
+bcftools concat -Ov -o carps32.vcf ./vcf2/*.vcf
 
+# replace 'M' in header that was pasted as rus letter - 5-7min
+bcftools head carps32.vcf | sed 's/CAR2494_М/CAR2494_M/' > carps32.vcf.new
+bcftools view -H carps32.vcf >> carps32.vcf.new && rm carps32.vcf && mv carps32.vcf.new carps32.vcf
+
+## select only SNPs
 gatk SelectVariants \
      -R ../../ref/GCF_018340385.1_ASM1834038v1_genomic.fna \
      -V carps32.vcf \
      --select-type-to-include SNP \
      -O carps32.SNPs.vcf
 
-
-ls CAR*.marked_duplicates.bam | parallel --dry-run qualimap --java-mem-size=16G bamqc -bam {} -nt 4 -c -outdir results_bamqc_{\.}
-
-gatk VariantsToTable \
--V carps32.SNPs.vcf \
--O carps32.SNPs.table \
--F CHROM -F POS -F QUAL -F QD -F DP -F MQ -F MQRankSum -F FS -F ReadPosRankSum -F SOR
-
-#5min
-gatk VariantsToTable \
-    -V carps32.SNPs.vcf \
-    -O carps32.SNPs.v2.table \
-    -F CHROM -F POS -F QUAL -F DP -F MQ -F AC -F AN -F
-
-#7min
+# filtration of variants  #7min
 gatk VariantFiltration \
     -R ../../ref/GCF_018340385.1_ASM1834038v1_genomic.fna \
     -V carps32.SNPs.vcf \
@@ -59,14 +52,6 @@ gatk VariantFiltration \
     --filter-name "1st_filter" \
     --filter-expression "QUAL < 20 || MQ < 30"
 
-# test
-bcftools head -n 1000 carps32.SNPs.flt.vcf > sample.vcf
-bcftools +trio-dnm2 -P ../pedigree.txt --with-pPL -Ov -o test_trios.vcf sample.vcf
-bcftools +trio-stats -p ../pedigree.txt  test_trios.vcf > test_trio_stats.txt
-# -i 'GQ>{10,20,30,40,50}'
-
-bcftools +trio-dnm2 -P ../pedigree.txt --with-pPL -Ov -o carps32.SNPs.flt.dnm2.vcf carps32.SNPs.flt.vcf
-bcftools +trio-stats -p ../pedigree.txt -i 'FORMAT/DP>5' carps32.SNPs.flt.dnm2.vcf > trio.stats.txt
 
 # gatk VariantFiltration \
 #     -R ../../ref/GCF_018340385.1_ASM1834038v1_genomic.fna \
@@ -75,6 +60,40 @@ bcftools +trio-stats -p ../pedigree.txt -i 'FORMAT/DP>5' carps32.SNPs.flt.dnm2.v
 #     --genotype-filter-name "2nd_filter" \
 #     --genotype-filter-expression "DP < 5"
 
+
+# Turn the vcfs to tables for Distributions checking in `prior_vcf_stats.r`
+# https://evodify.com/gatk-in-non-model-organism/
+
+#42min
+gatk VariantsToTable \
+    -V carps32.dnm2.SNPs.vcf \
+    -O carps32.dnm2.SNPs.table \
+    -F CHROM -F POS -F QUAL -F DP -F MQ -F AN -GF GT -GF DP -GF AD -GF DNM
+
+# gatk VariantsToTable \
+#     -V carps32.dnm2.SNPs.vcf.head10k \
+#     -O carps32.dnm2.SNPs.table.head10k \
+#     -F CHROM -F POS -F QUAL -F DP -F MQ -F AN -GF GT -GF DP -GF AD -GF DNM
+
+# Derive de novo mutations
+
+## test
+bcftools head -n 1000 carps32.SNPs.flt.vcf > sample.vcf
+bcftools +trio-dnm2 -P ../pedigree.txt --with-pPL -Ov -o test_trios.vcf sample.vcf
+bcftools +trio-stats -p ../pedigree.txt -i 'FORMAT/DP>{5,10,15}' test_trios.vcf > test_trio_stats.txt
+# -i 'GQ>{10,20,30,40,50}'
+
+## run on full data
+bcftools +trio-dnm2 -P ../pedigree.txt -o carps32.dnm2.vcf carps32.vcf
+bcftools +trio-stats -p ../pedigree.txt -i 'FORMAT/DP>{5,10,15}' carps32.dnm2.vcf > trio.stats2.txt
+bcftools +trio-stats -p ../pedigree.txt -i 'FORMAT/DP>{5,10,15}' carps32.dnm2.SNPs.vcf > trio.stats3.txt
+bcftools +mendelian2 carps32.dnm2.SNPs.vcf -i 'FORMAT/DP>5' -P ../pedigree.txt > mendelian.stats.txt
+
+# https://vcftools.sourceforge.net/man_latest.html
+vcftools --vcf carps32.dnm2.SNPs.vcf --mendel pedigree.txt.vcftools
+
+# On Muege vcf
+bcftools +trio-dnm2 -P pedigree.txt --with-pPL -o CARP_KANT.dnm2.vcf CARP_KANT.vcf
 
 ```
 
@@ -101,6 +120,13 @@ Calls de novo variants using information from a mother, father and child trio
 1. varscan https://varscan.sourceforge.net/trio-calling-de-novo-mutations.html
 2. bcftools +trio-dnm2 https://samtools.github.io/bcftools/howtos/plugin.trio-dnm2.html
 3. bcftools +mendelian https://samtools.github.io/bcftools/howtos/plugin.mendelian.html
+
+
+## Что сделать
+
+- по генам надо посмотреть де ново мутации
+- по бинам покрытия нормализовать сичло ДНМ?
+- хороши ли риды?
 
 
 ## Count intersection
@@ -198,3 +224,6 @@ For indels:
 2. https://bmcbiol.biomedcentral.com/articles/10.1186/s12915-023-01806-9#Sec10 - pipeline with nice description. Maybe it is the best for us
 3. https://pmc.ncbi.nlm.nih.gov/articles/PMC10083221/#s02 - GWAS on carp and gatk pipeline with hard filtering (VariantFiltration with the parameters “**QD<2.0 || QUAL<30.0 || SOR>3.0 || FS>20.0 || MQ<40.0 || MQRankSum<−12.5 || ReadPosRankSum<−8.0**”. The VCF files were then filtered with the parameters “–max-alleles 2 –min-alleles 2 –maf 0.05 –max-missing 0.8” using VCFtools (v1.15) (Danecek et al., 2011). The final dataset was purged by PLINK (v1.90) (Purcell et al., 2007) with the parameters “–indep-pairwise 100 1 0.5”, reducing the redundant highly linked SNPs)
 4. https://www.sciencedirect.com/science/article/pii/S294979812400019X#sec2 - gatk pipeline with hard filtering (QD ​< ​2.0, FS ​> ​60.0, MQ ​< ​30.0, HaplotypeScore > 13.0, MappingQualityRankSum ​< ​−12.5, and ReadPosRankSum ​< ​−8.0) AND GWAS AND annotation with annovar
+5. https://sci-hub.ru/10.1038/nature24018 DNMs in human Iceland
+6. https://www.nature.com/articles/ncomms6969#Sec9 DNMs in Danish trios
+7. https://genomemedicine.biomedcentral.com/articles/10.1186/s13073-020-00791-w review of variant calling
