@@ -44,6 +44,12 @@ gatk SelectVariants \
      --select-type-to-include SNP \
      -O carps32.SNPs.vcf
 
+gatk SelectVariants \
+     -R ../../ref/GCF_018340385.1_ASM1834038v1_genomic.fna \
+     -V cohort.merged.vcf \
+     --select-type-to-include SNP \
+     -O cohort.merged.SNPs.vcf
+
 # filtration of variants  #7min
 gatk VariantFiltration \
     -R ../../ref/GCF_018340385.1_ASM1834038v1_genomic.fna \
@@ -68,12 +74,12 @@ gatk VariantFiltration \
 gatk VariantsToTable \
     -V carps32.dnm2.SNPs.vcf \
     -O carps32.dnm2.SNPs.table \
-    -F CHROM -F POS -F QUAL -F DP -F MQ -F AN -GF GT -GF DP -GF AD -GF DNM
+    -F CHROM -F POS -F REF -F ALT -F QUAL -F DP -F MQ -F AN -GF GT -GF DP -GF AD
 
-# gatk VariantsToTable \
-#     -V carps32.dnm2.SNPs.vcf.head10k \
-#     -O carps32.dnm2.SNPs.table.head10k \
-#     -F CHROM -F POS -F QUAL -F DP -F MQ -F AN -GF GT -GF DP -GF AD -GF DNM
+gatk VariantsToTable \
+    -V carps32.dnm2.SNPs.vcf.head10k \
+    -O carps32.dnm2.SNPs.table.head10k \
+    -F CHROM -F POS -F REF -F ALT -F QUAL -F DP -F MQ -F AN -GF GT -GF DP -GF AD
 
 # Derive de novo mutations
 
@@ -161,7 +167,64 @@ vcftools --vcf CARP_KANT.vcf --out SNPs_only --recode --recode-INFO-all --minQ 3
 docker run --rm -it broadinstitute/gatk:4.1.3.0 -v "$WD":/data 
 ```
 
+## GATK pipeline
+
+```bash
+cd /data/interim/bams
+
+# 7 days
+# ./3call.sh
+
+# 1Tb of RAM and 4h
+cat intervals.list | parallel -j 51 --dry-run \
+    mkdir tmp/{} ';' \
+    gatk --java-options "-Xmx32g -Xms32g" GenomicsDBImport \
+    --genomicsdb-workspace-path GenomicsDB/carps32_{} \
+    --sample-name-map cohort.sample_map \
+    --tmp-dir tmp/{} \
+    --reader-threads 5 \
+    -L {}
+
+
+# gatk SelectVariants -R ../../ref/GCF_018340385.1_ASM1834038v1_genomic.fna \
+#     -V gendb://carps32_MT -L NC_001606.1:1-10 -O /dev/stdout
+
+# 150Gb of RAM and several hours
+cat intervals.list | parallel -j 51 --dry-run \
+    gatk GenotypeGVCFs \
+     -R ../../ref/GCF_018340385.1_ASM1834038v1_genomic.fna \
+     -V gendb://GenomicsDB/carps32_{} \
+     -O vcfs2/{}.vcf \
+    --tmp-dir tmp/{} \
+    --pedigree pedigree.gatk.txt \
+    --annotation PossibleDeNovo
+
+    #  -G StandardAnnotation \
+    #  --only-output-calls-starting-in-intervals \
+    #  --use-new-qual-calculator \
+    #  -V gendb://$WORKSPACE \
+    #  -L ${interval}
+
+
+# Шаг 4: Объединение VCF файлов
+
+#10min
+PICARD="java -jar /opt/tools/bin/picard.jar"
+ls vcfs/*.vcf > input_variant_files.list
+$PICARD MergeVcfs I=input_variant_files.list O=cohort.merged.vcf
+
+# 5
+gatk VariantsToTable \
+    -V cohort.merged.vcf \
+    -O cohort.merged.table \
+    -F CHROM -F POS -F REF -F ALT -F QUAL -F DP -F MQ -F AN -GF GT -GF DP -GF AD -GF GQ
+
+```
+
 ## Pipeline notes
+
+AC - это сколько альтернативного аллеля во всех семплах (число единичек так сказать в целом)
+
 
 https://www.nature.com/articles/s41598-020-77218-4
 The GATK pipeline workflow was applied following best practices (https://software.broadinstitute.org/gatk/best-practices). 
