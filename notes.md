@@ -219,6 +219,13 @@ gatk VariantsToTable \
     -O cohort.merged.table \
     -F CHROM -F POS -F REF -F ALT -F QUAL -F DP -F MQ -F AN -GF GT -GF DP -GF AD -GF GQ
 
+#test
+gatk VariantsToTable \
+    -V vcfs2/NC_056621.1.vcf \
+    -O NC_056621.1.table \
+    -F CHROM -F POS -F REF -F ALT -F QUAL -F DP -F MQ -F AN -F hiConfDeNovo -F loConfDeNovo -GF GT -GF DP -GF AD -GF GQ
+
+
 ```
 
 ## Pipeline notes

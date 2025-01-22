@@ -23,8 +23,8 @@ do
     echo "bwa mem + samtools sort process..." 
     bwa mem $REF $R1 $R2 -t $THREADS -Y -R $TAG | samtools view -bu | samtools sort -m 10G -@ $THREADS -o $sample.bam
     
-    echo "samtools index process..." 
-    samtools index $sample.bam
+    # echo "samtools index process..." 
+    # samtools index $sample.bam
 
     echo "samtools stats process..." 
     samtools idxstats --threads $THREADS $sample.bam > $sample.bam.idxstats

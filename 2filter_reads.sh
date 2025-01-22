@@ -1,19 +1,28 @@
-# cd /data/interim
+# cd data/interim/cor
 
-# WD=/home/kpotoh/carp/data/interim
+SAMPLES_FILE=../samples.txt
+THREADS=64
 
 PICARD="java -jar /opt/tools/bin/picard.jar"
 
-## 1) filter PCR duplicates
-# cat samples.txt | parallel -j 8 $PICARD MarkDuplicates I=bams/{}.bam O=bams/{.}.marked_duplicates.bam M=bams/{.}.marked_dup_metrics.txt
+# 1) filter PCR duplicates
+# cat $SAMPLES_FILE | parallel -j 8 $PICARD MarkDuplicates I={}.bam O={.}.marked_duplicates.bam M={.}.marked_dup_metrics.txt
 
-## 2) filter poorly mapped reads
-sambamba view -p -t 40 -f bam -v -F "mapping_quality >= 50" -o car2493_f.carp1.marked_duplicates.mapq50.bam car2493_f.carp1.marked_duplicates.bam
+for sample in $(cat $SAMPLES_FILE)
+do
+    # 2) filter poorly mapped reads
+    sambamba view -t $THREADS -f bam -v -F "mapping_quality >= 50" -o $sample.marked_duplicates.mapq50.bam $sample.marked_duplicates.bam
 
-# Подсчет числа ридов после фильтрации
-sambamba view -c -t 40 car2493_f.carp1.marked_duplicates.bam > car2493_f.carp1.marked_duplicates.bam.rN
+    # Подсчет числа ридов после фильтрации
+    sambamba view -c -t $THREADS $sample.marked_duplicates.mapq50.bam > $sample.marked_duplicates.mapq50.bam.rN
 
-## 3) Наконец, удаление всякого барахла (single reads, unmapped, secondary etc) после фильтрации
-samtools view -@ 40 -b -F 3852 car2493_f.carp1.marked_duplicates.mapq50.bam > car2493_f.carp1.marked_duplicates.mapq50.F3852.bam
+    # 3) Наконец, удаление всякого барахла (single reads, unmapped, secondary etc) после фильтрации
+    samtools view -@ $THREADS -b -F 3852 $sample.marked_duplicates.mapq50.bam > $sample.marked_duplicates.mapq50.F3852.bam
+    
+    samtools index $sample.marked_duplicates.mapq50.F3852.bam &
 
-## 4) Need to remove reads from non-chromosomal contigs
+    rm $sample.marked_duplicates.mapq50.bam
+    rm $sample.marked_duplicates.mapq50.bam.bai
+
+done
+wait
