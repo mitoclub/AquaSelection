@@ -48,6 +48,7 @@ gatk SelectVariants \
      -R ../../ref/GCF_018340385.1_ASM1834038v1_genomic.fna \
      -V cohort.merged.vcf \
      --select-type-to-include SNP \
+     --selectExpressions "QUAL > 20 || MQ > 30" \
      -O cohort.merged.SNPs.vcf
 
 # filtration of variants  #7min
@@ -134,7 +135,7 @@ Calls de novo variants using information from a mother, father and child trio
 - по бинам покрытия нормализовать сичло ДНМ?
 - хороши ли риды?
 
-
+<!-- 
 ## Count intersection
 
 ```bash
@@ -142,24 +143,24 @@ Calls de novo variants using information from a mother, father and child trio
 bcftools view -H CARP_KANT.vcf | wc -l
 # 28822046
 
-#split to 32 separate files
-bcftools +split CARP_KANT.vcf.gz -Oz -o separated
+# #split to 32 separate files
+# bcftools +split CARP_KANT.vcf.gz -Oz -o separated
 
-# reformat to tabix-like
-bcftools view CARP_KANT.vcf -Oz -o CARP_KANT.vcf.gz
+# # reformat to tabix-like
+# bcftools view CARP_KANT.vcf -Oz -o CARP_KANT.vcf.gz
 
-# make index of vcf
-bcftools index --threads 4 CARP_KANT.vcf.gz
+# # make index of vcf
+# bcftools index --threads 4 CARP_KANT.vcf.gz
 
-# intersect samples
-bcftools isec -p isec_out --threads 4 CARP_KANT.vcf.gz
+# # intersect samples
+# bcftools isec -p isec_out --threads 4 CARP_KANT.vcf.gz
 
 
 
 # filter the variants
 # bcftools view -e 'TYPE="indel"' -i 'QUAL>30 && DP>5^C& GQ>20'
 vcftools --vcf CARP_KANT.vcf --out SNPs_only --recode --recode-INFO-all --minQ 30 --minDP 5 --minGQ 20 --remove-indels
-```
+``` -->
 
 ## Run GATK in docker
 
