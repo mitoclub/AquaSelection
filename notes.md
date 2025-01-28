@@ -218,7 +218,8 @@ $PICARD MergeVcfs I=input_variant_files.list O=cohort.merged.vcf
 gatk VariantsToTable \
     -V cohort.merged.vcf \
     -O cohort.merged.table \
-    -F CHROM -F POS -F REF -F ALT -F QUAL -F DP -F MQ -F AN -GF GT -GF DP -GF AD -GF GQ
+    -F CHROM -F POS -F REF -F ALT -F hiConfDeNovo -GF GT -GF AD -GF PL
+
 
 #test
 gatk VariantsToTable \
