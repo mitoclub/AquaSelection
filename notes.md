@@ -71,16 +71,16 @@ gatk VariantFiltration \
 # Turn the vcfs to tables for Distributions checking in `prior_vcf_stats.r`
 # https://evodify.com/gatk-in-non-model-organism/
 
-#42min
-gatk VariantsToTable \
-    -V carps32.dnm2.SNPs.vcf \
-    -O carps32.dnm2.SNPs.table \
-    -F CHROM -F POS -F REF -F ALT -F QUAL -F DP -F MQ -F AN -GF GT -GF DP -GF AD
+# #42min
+# gatk VariantsToTable \
+#     -V carps32.dnm2.SNPs.vcf \
+#     -O carps32.dnm2.SNPs.table \
+#     -F CHROM -F POS -F REF -F ALT -F QUAL -F DP -F MQ -F AN -GF GT -GF DP -GF AD
 
-gatk VariantsToTable \
-    -V carps32.dnm2.SNPs.vcf.head10k \
-    -O carps32.dnm2.SNPs.table.head10k \
-    -F CHROM -F POS -F REF -F ALT -F QUAL -F DP -F MQ -F AN -GF GT -GF DP -GF AD
+# gatk VariantsToTable \
+#     -V carps32.dnm2.SNPs.vcf.head10k \
+#     -O carps32.dnm2.SNPs.table.head10k \
+#     -F CHROM -F POS -F REF -F ALT -F QUAL -F DP -F MQ -F AN -GF GT -GF DP -GF AD
 
 # Derive de novo mutations
 
@@ -214,12 +214,18 @@ PICARD="java -jar /opt/tools/bin/picard.jar"
 ls vcfs/*.vcf > input_variant_files.list
 $PICARD MergeVcfs I=input_variant_files.list O=cohort.merged.vcf
 
-# 5
+
+# basic stats for total variants filtering
+gatk VariantsToTable \
+    -V cohort.merged.vcf \
+    -O cohort.merged.table.basic \
+    -F CHROM -F POS -F QD -F FS -F SOR -F MQ -F MQRankSum -F ReadPosRankSum
+
+# extract sample-specific data
 gatk VariantsToTable \
     -V cohort.merged.vcf \
     -O cohort.merged.table \
-    -F CHROM -F POS -F REF -F ALT -F hiConfDeNovo -GF GT -GF AD -GF PL
-
+    -F CHROM -F POS -F TYPE -F hiConfDeNovo -GF GT -GF DP -GF AD -GF PL -GF GQ
 
 #test
 gatk VariantsToTable \
