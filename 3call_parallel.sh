@@ -110,39 +110,9 @@ if [[ ! -f "cohort.merged.vcf" ]]; then
     exit 1
 fi
 
-# 7 days
-# ./3call.sh
-
-# 1Tb of RAM and 4h
-# merge several samples by chromosomes separately
-# cat intervals.list | parallel -j 51 --dry-run \
-#     mkdir tmp/{} ';' \
-#     gatk --java-options "-Xmx32g -Xms32g" GenomicsDBImport \
-#     --genomicsdb-workspace-path GenomicsDB/carps32_{} \
-#     --sample-name-map cohort.sample_map \
-#     --tmp-dir tmp/{} \
-#     --reader-threads 5 \
-#     -L {}
-
-# 150Gb of RAM and several hours
-# cat intervals.list | parallel -j 51 --dry-run \
-#     gatk GenotypeGVCFs \
-#      -R ../../ref/GCF_018340385.1_ASM1834038v1_genomic.fna \
-#      -V gendb://GenomicsDB/carps32_{} \
-#      -O vcfs2/{}.vcf \
-#     --tmp-dir tmp/{} \
-#     --pedigree pedigree.gatk.txt \
-#     --annotation PossibleDeNovo
-
-# # Шаг 4: Объединение VCF файлов
-
-# #10min
-# ls vcfs/*.vcf > input_variant_files.list
-# $PICARD MergeVcfs I=input_variant_files.list O=cohort.merged.vcf
-
 # 5
-gatk VariantsToTable \
-    -V cohort.merged.vcf \
-    -O cohort.merged.table \
-    -F CHROM -F POS -F REF -F ALT -F QUAL -F DP -F MQ -F AN \
-    -F hiConfDeNovo -F loConfDeNovo -GF GT -GF DP -GF AD -GF GQ
+# gatk VariantsToTable \
+#     -V cohort.merged.vcf \
+#     -O cohort.merged.table \
+#     -F CHROM -F POS -F REF -F ALT -F QUAL -F DP -F MQ -F AN \
+#     -F hiConfDeNovo -F loConfDeNovo -GF GT -GF DP -GF AD -GF GQ

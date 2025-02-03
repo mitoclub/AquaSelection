@@ -18,8 +18,27 @@ gatk VariantFiltration \
    --filter-name "SOR_filter" \
    --filter-expression "SOR > 3.0"
 
+bcftools filter \
+  --SnpGap 5 \
+  -o cohort.merged.flt.snpgap.vcf \
+  -O v \
+  cohort.merged.flt.vcf
+
+# bcftools filter \
+#   --SnpGap 5 \
+#   -o sample.snpgap.vcf \
+#   -O v \
+#   sample.vcf
+
 
 gatk VariantsToTable \
-    -V cohort.merged.flt.vcf \
-    -O cohort.merged.flt.table \
+    -V cohort.merged.flt.snpgap.vcf \
+    -O cohort.merged.flt.snpgap.table \
     -F CHROM -F POS -F TYPE -F hiConfDeNovo -GF GT -GF DP -GF AD -GF PL -GF GQ
+
+
+python3 filter_by_parents.py cohort.merged.flt.snpgap.table cohort.merged.flt.snpgap.parents.parquet
+
+# initial size: 21815000
+# after GQ and DP flt: 13944823
+# after PL and AD flt: 13902490
