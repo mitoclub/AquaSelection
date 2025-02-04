@@ -31,6 +31,15 @@ bcftools filter \
 #   sample.vcf
 
 
+# /home/kpotoh/.conda/envs/carp/bin/java -Xms20g -Xmx40g   \
+#   -jar ~/.conda/envs/carp/share/snpeff-5.2-1/snpEff.jar build -gtf22 -v Cyprinus_carpio_ASM1834038v1
+
+/home/kpotoh/.conda/envs/carp/bin/java -Xms20g -Xmx40g \
+  -jar ~/.conda/envs/carp/share/snpeff-5.2-1/snpEff.jar \
+  -v Cyprinus_carpio_ASM1834038v1 cohort.merged.flt.snpgap.vcf \
+  -noLog -v > test.ann.vcf
+
+
 gatk VariantsToTable \
     -V cohort.merged.flt.snpgap.vcf \
     -O cohort.merged.flt.snpgap.table \

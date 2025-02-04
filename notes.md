@@ -305,3 +305,4 @@ For indels:
 5. https://sci-hub.ru/10.1038/nature24018 DNMs in human Iceland
 6. https://www.nature.com/articles/ncomms6969#Sec9 DNMs in Danish trios
 7. https://genomemedicine.biomedcentral.com/articles/10.1186/s13073-020-00791-w review of variant calling
+8. UCSC link https://genome-euro.ucsc.edu/h/GCF_018340385.1
