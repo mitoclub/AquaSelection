@@ -18,6 +18,13 @@ tabix -p gff data.gff.gz
 # OUTPUT=../interim/cor/sample.annotated.tsv
 
 INPUT=../interim/cor/cohort.merged.flt.snpgap.dnm_gatk.recode.vcf
-OUTPUT=../interim/cor/cohort.merged.flt.snpgap.dnm_gatk.annotated.tsv
+OUTPUT=../interim/cor/cohort.merged.flt.snpgap.dnm_gatk.annotated.vcf
 
-vep -i $INPUT -o $OUTPUT --gff data.gff.gz --fasta GCF_018340385.1_ASM1834038v1_genomic.fna --tab
+vep -i $INPUT -o $OUTPUT --gff data.gff.gz \
+    --fasta GCF_018340385.1_ASM1834038v1_genomic.fna --vcf --species cyprinus_carpio
+
+
+gatk VariantsToTable \
+    -V cohort.merged.flt.snpgap.dnm_gatk.annotated.vcf \
+    -O cohort.merged.flt.snpgap.dnm_gatk.annotated.table \
+    -F CHROM -F POS -F TYPE -F CSQ
